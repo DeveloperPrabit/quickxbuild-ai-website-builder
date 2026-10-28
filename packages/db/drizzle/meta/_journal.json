@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1752239997146,
+      "tag": "0000_smooth_hardball",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1756822871709,
+      "tag": "0001_sticky_blade",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757330000000,
+      "tag": "0002_workspace_billing",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1757500000000,
+      "tag": "0003_app_data_and_ai_ledger",
+      "breakpoints": true
+    }
+  ]
+}

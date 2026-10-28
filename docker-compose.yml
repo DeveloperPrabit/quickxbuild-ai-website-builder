@@ -1,0 +1,99 @@
+services:
+  # Optional local Postgres. For Neon production use docker-compose.prod.yml
+  postgres:
+    image: postgres:17-alpine
+    container_name: quickxbuild-postgres
+    restart: unless-stopped
+    profiles: ["local-db"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-quickxbuild}
+      POSTGRES_USER: ${POSTGRES_USER:-quickxbuild}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quickxbuild}
+    ports:
+      - "${POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - quickxbuild-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-quickxbuild} -d ${POSTGRES_DB:-quickxbuild}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /workspace
+    command: ["bun", "run", "db:migrate:docker"]
+    env_file:
+      - .env
+    environment:
+      POSTGRES_URL: ${POSTGRES_URL}
+    profiles: ["local-db"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /workspace/apps/web
+    command: ["bun", "run", "dev"]
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      POSTGRES_URL: ${POSTGRES_URL}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3001}
+    ports:
+      - "${WEB_PORT:-3001}:3000"
+    volumes:
+      - .:/workspace
+      - quickxbuild-root-node-modules:/workspace/node_modules
+      - quickxbuild-web-node-modules:/workspace/apps/web/node_modules
+      - quickxbuild-next-cache:/workspace/apps/web/.next
+    profiles: ["local-db"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # QuickXBuild model service (opt-in): docker compose --profile model up model-server
+  # The web app reaches it at http://model-server:3010 inside this network.
+  # Only the variables listed here are passed in — never the whole .env.
+  model-server:
+    build:
+      context: ./services/model-server
+      dockerfile: Dockerfile
+    container_name: quickxbuild-model-server
+    restart: unless-stopped
+    profiles: ["model"]
+    environment:
+      SERVICE_ENV: ${MODEL_SERVICE_ENV:-development}
+      MODEL_SERVICE_TOKEN: ${MODEL_SERVICE_TOKEN:-}
+      MODEL_PROVIDER: ${MODEL_PROVIDER:-test}
+      MODEL_NAME: ${MODEL_NAME:-}
+      MODEL_VERSION: ${MODEL_VERSION:-quickxbuild-model-v0}
+      MODEL_BASE_URL: ${MODEL_BASE_URL:-}
+      MODEL_API_KEY: ${MODEL_API_KEY:-}
+      TEACHER_ENABLED: ${TEACHER_ENABLED:-false}
+      TEACHER_PROVIDER: ${TEACHER_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+      TEACHER_CONFIDENCE_THRESHOLD: ${TEACHER_CONFIDENCE_THRESHOLD:-0.6}
+      TEACHER_MAX_REPAIR_ATTEMPTS: ${TEACHER_MAX_REPAIR_ATTEMPTS:-2}
+      TEACHER_MAX_CALLS_PER_TASK: ${TEACHER_MAX_CALLS_PER_TASK:-3}
+      MODEL_DATA_DIR: /data
+    ports:
+      - "${MODEL_SERVICE_PORT:-3010}:3010"
+    volumes:
+      - quickxbuild-model-data:/data
+
+volumes:
+  quickxbuild-model-data:
+  quickxbuild-postgres-data:
+  quickxbuild-root-node-modules:
+  quickxbuild-web-node-modules:
+  quickxbuild-next-cache:

@@ -1,0 +1,11 @@
+{
+  "extends": "@quickxbuild/typescript-config/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@quickxbuild/ui/*": ["./src/*"]
+    }
+  },
+  "include": ["*.ts", "src"],
+  "exclude": ["node_modules"]
+}

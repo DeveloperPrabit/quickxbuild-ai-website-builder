@@ -1,0 +1,23 @@
+services:
+  web:
+    volumes:
+      - web-wrangler:/workspace/apps/web/.wrangler
+      - /opt/quickxbuild/scripts/web-prod.sh:/workspace/scripts/web-prod.sh:ro
+      - /opt/quickxbuild/apps/web/.next:/workspace/apps/web/.next
+    environment:
+      ENVIRONMENT: production
+      NEXT_PUBLIC_ENVIRONMENT: production
+      NEXT_PUBLIC_SCAN: "0"
+      AUTH_CROSS_SUBDOMAIN: "0"
+      NODE_ENV: production
+      LIGHT_NEXT_BUILD: "1"
+      PORT: 3000
+      POSTGRES_URL: ${POSTGRES_URL}
+      NEXT_PUBLIC_APP_URL: https://websitebuilder.techspireglobal.com
+      NEXT_PUBLIC_CDN_URL: https://websitebuilder.techspireglobal.com
+      NEXT_PUBLIC_DEPLOY_URL: https://websitebuilder.techspireglobal.com
+      NEXT_PUBLIC_DISPATCHER_URL: https://websitebuilder.techspireglobal.com
+      NEXT_PUBLIC_SANDBOX_DEFAULT_PROVIDER: e2b
+      NEXT_PUBLIC_SANDBOX_BUILDER_DEFAULT_PROVIDER: e2b
+      AUTH_COOKIE_DOMAIN: ""
+      HOSTNAME: 0.0.0.0

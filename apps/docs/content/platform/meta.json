@@ -1,0 +1,22 @@
+{
+  "title": "QuickXBuild",
+  "description": "Platform specific features and integrations",
+  "icon": "Server",
+  "root": true,
+  "pages": [
+    "---Quickstart---",
+    "index",
+    "quickstart",
+    "faq",
+    "---Using QuickXBuild---",
+    "usingquickxbuild/deploy/index",
+    "usingquickxbuild/directEdit/index",
+    "usingquickxbuild/timeMachine/index",
+    "---Guides---",
+    "guides/effective-ai-communication",
+    "---Account & Billing---",
+    "account/index",
+    "---Community---",
+    "community/index"
+  ]
+}

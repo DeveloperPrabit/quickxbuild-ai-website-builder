@@ -1,0 +1,60 @@
+# Production: Neon Postgres + web behind host nginx
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /workspace
+    command: ["bun", "run", "db:migrate:docker"]
+    env_file:
+      - .env
+    environment:
+      POSTGRES_URL: ${POSTGRES_URL}
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /workspace/apps/web
+    command: ["sh", "/workspace/scripts/web-prod.sh"]
+    env_file:
+      - .env
+    environment:
+      ENVIRONMENT: production
+      NEXT_PUBLIC_ENVIRONMENT: production
+      NEXT_PUBLIC_SCAN: "0"
+      AUTH_CROSS_SUBDOMAIN: "0"
+      NODE_ENV: production
+      LIGHT_NEXT_BUILD: "1"
+      PORT: 3000
+      POSTGRES_URL: ${POSTGRES_URL}
+      NEXT_PUBLIC_APP_URL: https://websitebuilder.techspireglobal.com
+      NEXT_PUBLIC_CDN_URL: https://websitebuilder.techspireglobal.com
+      NEXT_PUBLIC_DEPLOY_URL: https://websitebuilder.techspireglobal.com
+      NEXT_PUBLIC_DISPATCHER_URL: https://websitebuilder.techspireglobal.com
+      NEXT_PUBLIC_SANDBOX_DEFAULT_PROVIDER: e2b
+      NEXT_PUBLIC_SANDBOX_BUILDER_DEFAULT_PROVIDER: e2b
+      AUTH_COOKIE_DOMAIN: ""
+      HOSTNAME: 0.0.0.0
+      CURSOR_API_KEY: ${CURSOR_API_KEY:-}
+      CURSOR_AGENT_ENABLED: ${CURSOR_AGENT_ENABLED:-1}
+      CURSOR_AGENT_MODEL: ${CURSOR_AGENT_MODEL:-composer-2.5}
+      # Meta Muse Spark (primary chat LLM for site builds)
+      MODEL_API_KEY: ${MODEL_API_KEY:-}
+      MODEL_API_BASE_URL: ${MODEL_API_BASE_URL:-https://api.meta.ai/v1}
+      MODEL_NAME: ${MODEL_NAME:-muse-spark-1.3}
+      AI_PROVIDER: ${AI_PROVIDER:-muse}
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - web-wrangler:/workspace/apps/web/.wrangler
+      - /opt/quickxbuild/scripts/web-prod.sh:/workspace/scripts/web-prod.sh:ro
+      - /opt/quickxbuild/apps/web/.next:/workspace/apps/web/.next
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  web-wrangler:

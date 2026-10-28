@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 520" role="img" aria-label="quickxbuild logo dark">
+  <defs>
+    <linearGradient id="qxg-grad-dark" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="35%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="qxg-glow-dark" x1="0%" x2="100%" y1="0%" y2="0%">
+      <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(30 40)">
+    <polygon points="80,80 220,80 520,380 380,380" fill="url(#qxg-grad-dark)"/>
+    <polygon points="80,380 220,380 520,80 380,80" fill="url(#qxg-grad-dark)"/>
+    <polygon points="200,30 260,30 540,360 480,360" fill="#f8fafc" opacity="0.18"/>
+    <polygon points="160,80 240,80 560,410 480,410" fill="url(#qxg-glow-dark)" opacity="0.45"/>
+    <circle cx="420" cy="150" r="8" fill="#7dd3fc"/>
+    <circle cx="470" cy="200" r="8" fill="#38bdf8"/>
+    <circle cx="520" cy="250" r="8" fill="#e0f2fe"/>
+    <path d="M540 120 L520 90 L570 84 L620 150 L570 150 Z" fill="url(#qxg-grad-dark)" opacity="0.9"/>
+    <path d="M540 320 L520 350 L570 356 L620 290 L570 290 Z" fill="url(#qxg-grad-dark)" opacity="0.9"/>
+    <path d="M510 120 L590 120 L615 160 L560 160 Z" fill="#67e8f9" opacity="0.9"/>
+  </g>
+
+  <g fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-weight="800">
+    <text x="640" y="240" font-size="180">quickxbuild</text>
+    <text x="1060" y="368" font-size="110">.com</text>
+  </g>
+</svg>

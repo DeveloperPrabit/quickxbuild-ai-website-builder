@@ -1,0 +1,45 @@
+# Generated-app API (Node on :8787). Copy to .dev.vars or export in the shell.
+
+ENVIRONMENT=development
+APP_URL=http://localhost:5174
+APP_API_URL=http://127.0.0.1:8787
+APP_API_PORT=8787
+# APP_SCHEMA=app_local
+# DATABASE_URL=postgresql://greenflow:greenflow@localhost:5433/quickxbuild
+# UPLOAD_DIR=uploads
+
+# Localhost OAuth. Register callbacks:
+#   http://127.0.0.1:8787/api/auth/google/callback
+#   http://127.0.0.1:8787/api/auth/github/callback
+# GOOGLE_CLIENT_ID=
+# GOOGLE_CLIENT_SECRET=
+# GITHUB_CLIENT_ID=
+# GITHUB_CLIENT_SECRET=
+
+# Shop payments — generated-app keys only. Do not copy QuickXBuild platform STRIPE_SECRET_KEY.
+# Stripe test + CLI webhook: stripe listen --forward-to localhost:8787/api/webhooks/stripe
+# STRIPE_SECRET_KEY=
+# STRIPE_WEBHOOK_SECRET=
+
+# Email (Resend). If unset, reset/order mail is printed in the API log.
+# RESEND_API_KEY=
+# RESEND_FROM=noreply@localhost
+# SMTP_HOST=
+# SMTP_USER=
+# SMTP_PASS=
+
+# eSewa test (Nepal). Official form defaults to rc-epay.
+# ESEWA_PRODUCT_CODE=
+# ESEWA_SECRET_KEY=
+# ESEWA_FORM_URL=https://rc-epay.esewa.com.np/api/epay/main/v2/form
+
+# Paytm / Khalti (501 until set)
+# PAYTM_MID=
+# PAYTM_MERCHANT_KEY=
+# KHALTI_SECRET_KEY=
+
+# Optional Next.js SEO catalog on :3005 (same Hono API).
+# LOCAL_NEXT_PREVIEW_URL=http://localhost:3005
+
+# Deferred catalog: Twilio, maps, i18n, CMS, cron, VPS, sandbox dev:full, playbooks, agent loop.
+# After VPS tests pass, switch APP_URL and OAuth/payment callback URLs to https://your-domain.

@@ -1,0 +1,34 @@
+{
+  "name": "@quickxbuild/sandbox",
+  "version": "1.0.2",
+  "private": true,
+  "description": "Sandbox utilities and types for QuickXBuild",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "src/*"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist .turbo node_modules",
+    "format-and-lint": "biome check .",
+    "format-and-lint:fix": "biome check . --write",
+    "typecheck": "tsc --noEmit",
+    "update": "bun update"
+  },
+  "dependencies": {
+    "@daytonaio/sdk": "^0.25.6",
+    "@quickxbuild/common": "*",
+    "e2b": "2.61.0"
+  },
+  "devDependencies": {
+    "@quickxbuild/typescript-config": "*",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
+  }
+}

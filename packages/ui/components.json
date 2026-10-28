@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/styles/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@quickxbuild/ui/components",
+    "utils": "@quickxbuild/ui/lib/utils",
+    "hooks": "@quickxbuild/ui/hooks",
+    "lib": "@quickxbuild/ui/lib",
+    "ui": "@quickxbuild/ui/components"
+  },
+  "iconQuickXBuildry": "lucide"
+}
