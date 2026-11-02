@@ -395,7 +395,9 @@ export function analyzeProductBlueprint(
     },
     animations: 'subtle',
     packagesToInstall: [],
-    terminalSteps: ['bun install', 'bun run build'],
+    // Install only — Preview uses `bun run dev` on :5173 (platform-managed).
+    // Do not treat production `bun run build` as the preview server.
+    terminalSteps: ['bun install'],
   }
 }
 
@@ -524,6 +526,58 @@ ${JSON.stringify(research, null, 2)}
 </siteResearch>`
 }
 
+/**
+ * Short prose for the Thinking tab: what the prompt means and what will be built.
+ * Never mentions which model/agent owns which folder.
+ */
+export function formatAnalysisThought(
+  prompt: string,
+  blueprint?: ProductBlueprint | null,
+  research?: SiteResearch | null
+): string {
+  const gist = prompt.replace(/\s+/g, ' ').trim()
+  const asked =
+    gist.length > 220 ? `${gist.slice(0, 220)}…` : gist || 'a change to this project'
+
+  if (!blueprint) {
+    return `You asked for ${asked}. I am reading the project to see what already exists, then I will update the files that match this request.`
+  }
+
+  const pageList = blueprint.pages
+    .slice(0, 8)
+    .map((page) => page.title)
+    .join(', ')
+  const sectionBits =
+    research?.sectionIdeas?.slice(0, 5).join(', ') ||
+    blueprint.pages
+      .flatMap((page) => page.mustHaveSections)
+      .slice(0, 6)
+      .join(', ')
+  const dataBits = [
+    blueprint.backend.auth ? 'sign-in' : null,
+    blueprint.backend.forms ? 'forms / contact' : null,
+    blueprint.backend.tables.length > 0
+      ? `data for ${blueprint.backend.tables.slice(0, 4).join(', ')}`
+      : null,
+  ].filter(Boolean)
+
+  const lines = [
+    `You asked for ${asked}.`,
+    `I read that as a ${blueprint.vertical} product for "${blueprint.brandName}"${
+      blueprint.tagline ? ` — ${blueprint.tagline}` : ''
+    }.`,
+    research?.audience ? `Audience: ${research.audience}.` : '',
+    pageList ? `Pages to ship: ${pageList}.` : '',
+    sectionBits ? `Key sections: ${sectionBits}.` : '',
+    dataBits.length > 0
+      ? `Also needs ${dataBits.join(', ')}.`
+      : 'This looks mostly UI-focused (no heavy backend inferred).',
+    blueprint.researchNote ? blueprint.researchNote : '',
+  ].filter(Boolean)
+
+  return lines.join(' ')
+}
+
 /** Visible build plan checklist derived from a blueprint. */
 export function buildPlanFromBlueprint(blueprint: ProductBlueprint): BuildPlanItem[] {
   const items: BuildPlanItem[] = [
@@ -547,7 +601,7 @@ export function buildPlanFromBlueprint(blueprint: ProductBlueprint): BuildPlanIt
     },
     {
       id: 'scaffold',
-      label: `Scaffold: ${blueprint.terminalSteps.join(' → ') || 'bun install → bun run build'}`,
+      label: `Scaffold: ${blueprint.terminalSteps.join(' → ') || 'bun install'}`,
       status: 'pending',
     },
     {

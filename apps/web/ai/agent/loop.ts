@@ -123,6 +123,11 @@ type LoopInput = {
   completeness?: CompletenessItem[]
   /** Phase 1 product blueprint — drives ordered full-build passes. */
   blueprint?: ProductBlueprint | null
+  /**
+   * Prompt-analysis prose for the Thinking tab (what was understood / will be built).
+   * Must not mention agent routing (Cursor vs OpenAI).
+   */
+  analysisThought?: string
   /** Plan id for Agent Runtime NDJSON (Phase 1). */
   planId?: string
   /** Project id for Phase 2 mutation lock + durable history. */
@@ -349,17 +354,29 @@ async function runAgentLoopBody(
   }
 
   onProgress?.('Planning changes for your project…')
-  onTimeline?.({
-    id: 'thought-plan',
-    kind: 'thought',
-    title: cursorEnabled
-      ? 'Assigning OpenAI (UI) + Cursor (backend) agents'
-      : openingTitle,
-    detail: cursorEnabled
-      ? 'Splitting frontend to OpenAI and server/auth/db to Cursor to reduce token waste and confusion.'
-      : 'I am reading your project and planning the exact files to change.',
-    status: 'running',
-  })
+  // Thinking tab: analysis only. Prefer generate.ts analysisThought (already emitted);
+  // otherwise emit a local fallback — never agent-routing copy.
+  const analysisAlreadyEmitted = Boolean(input.analysisThought?.trim())
+  if (!analysisAlreadyEmitted) {
+    const analysisDetail = blueprint
+      ? `Building ${blueprint.brandName}${blueprint.vertical ? ` (${blueprint.vertical})` : ''}. ${
+          completeness.length > 0
+            ? `Screens: ${completeness
+                .slice(0, 10)
+                .map((item) => item.title)
+                .join(', ')}.`
+            : 'Mapping the request to project files.'
+        }`
+      : 'I am reading your project and planning the exact files to change.'
+    onTimeline?.({
+      id: 'thought-plan',
+      kind: 'thought',
+      title: openingTitle,
+      detail: analysisDetail,
+      durationMs: Date.now() - thoughtStarted,
+      status: 'done',
+    })
+  }
   onTimeline?.({
     kind: 'check',
     title: 'Checking your project files',
@@ -386,35 +403,6 @@ async function runAgentLoopBody(
         },
       })
     : Promise.resolve(null)
-
-  {
-    const planLines = [
-      blueprint
-        ? `Building ${blueprint.brandName}${blueprint.vertical ? ` (${blueprint.vertical})` : ''}.`
-        : '',
-      isFullBuild && blueprint
-        ? `Order: ${buildOrchestratedPasses(blueprint)
-            .map((pass) => pass.title)
-            .join(' → ')}.`
-        : '',
-      completeness.length > 0
-        ? `Screens to ship: ${completeness
-            .slice(0, 10)
-            .map((item) => item.title)
-            .join(', ')}.`
-        : '',
-      work.length > 0 ? `Tasks: ${work.map((task) => task.title).join('; ')}.` : '',
-      cursorEnabled ? 'Backend (server, auth, db) goes to the Cursor agent; UI stays here.' : '',
-    ].filter(Boolean)
-    onTimeline?.({
-      id: 'thought-plan',
-      kind: 'thought',
-      title: openingTitle,
-      detail: planLines.join('\n') || 'Mapped your request to the files that need to change.',
-      durationMs: Date.now() - thoughtStarted,
-      status: 'done',
-    })
-  }
 
   for (const modelId of toolModels) {
     if (isFullBuild && blueprint) {

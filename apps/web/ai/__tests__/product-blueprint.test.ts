@@ -9,6 +9,7 @@ import {
   blueprintToCompleteness,
   buildPlanFromBlueprint,
   buildSiteResearch,
+  formatAnalysisThought,
 } from '../design/product-blueprint'
 
 describe('product blueprint', () => {
@@ -56,5 +57,16 @@ describe('product blueprint', () => {
     const research = buildSiteResearch('build gym website named FlexLab', bp)
     expect(research.audience.length).toBeGreaterThan(10)
     expect(research.sectionIdeas.length).toBeGreaterThan(2)
+  })
+
+  test('analysis thought describes product without agent routing', () => {
+    const prompt = 'build a gym website named FlexLab with memberships'
+    const bp = analyzeProductBlueprint(prompt)!
+    const research = buildSiteResearch(prompt, bp)
+    const thought = formatAnalysisThought(prompt, bp, research)
+    expect(thought.toLowerCase()).toContain('flexlab')
+    expect(thought.toLowerCase()).toContain('gym')
+    expect(thought).toMatch(/pages to ship/i)
+    expect(thought).not.toMatch(/cursor|openai|agent routing/i)
   })
 })

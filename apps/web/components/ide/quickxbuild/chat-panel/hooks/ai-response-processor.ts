@@ -90,10 +90,15 @@ export const createResponseProcessor = (
     board.reset()
     board.setPreviewStatus('applying')
     board.pushActivity('Starting…')
+    board.pushActivity('Visit the Terminal and Edit tabs to see file edits')
     useTerminalStore.getState().reset()
     useTerminalStore.getState().append({
       kind: 'info',
       text: 'Agent Runtime session started',
+    })
+    useTerminalStore.getState().append({
+      kind: 'info',
+      text: 'Tip: open the Terminal and Edit tabs to follow commands and file edits',
     })
 
     // Per-run Details timeline (kept across requests, keyed by planId)
@@ -160,16 +165,8 @@ export const createResponseProcessor = (
         } else if (message.type === 'progress') {
           const content = message.data?.content || ''
           if (content) {
+            // Activity/Details only — do not mirror orchestration progress into Thinking.
             useAgentBoardStore.getState().pushActivity(content)
-            // Mirror into Thinking panel so users see live status (not an empty skeleton).
-            await streamingHandlers.handleThinkingMessage(
-              {
-                type: 'thinking',
-                planId,
-                data: { content: `${content}\n` },
-              },
-              planId
-            )
           }
         } else if (message.type === 'timeline') {
           const step = message.data
@@ -218,15 +215,24 @@ export const createResponseProcessor = (
                 durationMs: step.durationMs,
               })
             }
+            // Thinking tab: analysis thoughts only — skip agent-routing / orchestration copy.
             if (step.kind === 'thought' && step.detail) {
-              await streamingHandlers.handleThinkingMessage(
-                {
-                  type: 'thinking',
-                  planId,
-                  data: { content: `${step.detail}\n` },
-                },
-                planId
-              )
+              const thoughtText = String(step.detail)
+              const thoughtTitle = String(step.title || '')
+              const isOrchestration =
+                /cursor\s*(backend|agent)|openai\s*\(ui\)|assigning openai|splitting frontend|server\/auth\/db to cursor|cursor handles|openai handles/i.test(
+                  `${thoughtTitle}\n${thoughtText}`
+                )
+              if (!isOrchestration) {
+                await streamingHandlers.handleThinkingMessage(
+                  {
+                    type: 'thinking',
+                    planId,
+                    data: { content: `${thoughtText}\n` },
+                  },
+                  planId
+                )
+              }
             }
             if (step.kind === 'edit' || step.kind === 'check' || step.kind === 'verify') {
               boardState.pushActivity(

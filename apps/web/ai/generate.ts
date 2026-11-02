@@ -56,9 +56,11 @@ import {
   blueprintToCompleteness,
   buildPlanFromBlueprint,
   buildSiteResearch,
+  formatAnalysisThought,
   formatProductBlueprintXml,
   formatSiteResearchXml,
   type ProductBlueprint,
+  type SiteResearch,
 } from './design/product-blueprint'
 import { buildLocalDesignSpec, type DesignSpec } from './design/spec'
 import { analyzeDesignImage } from './design/vision'
@@ -147,6 +149,7 @@ export const generateStreamResponse = async (
     let designXml: string | null = null
     let design: DesignSpec | null = null
     let blueprint: ProductBlueprint | null = null
+    let siteResearch: SiteResearch | null = null
     let siteResearchXml = ''
 
     // Phase 1: prompt analyzer → site research → visible build plan (full builds only)
@@ -154,7 +157,7 @@ export const generateStreamResponse = async (
       blueprint = analyzeProductBlueprint(prompt, { hasDesign: Boolean(imageData) })
       if (blueprint) {
         onProgress?.(`Analyzing ${blueprint.brandName} (${blueprint.vertical})…`)
-        const siteResearch = buildSiteResearch(prompt, blueprint)
+        siteResearch = buildSiteResearch(prompt, blueprint)
         blueprint = { ...blueprint, researchNote: siteResearch.audience }
         siteResearchXml = formatSiteResearchXml(siteResearch)
         onProgress?.(
@@ -181,6 +184,17 @@ export const generateStreamResponse = async (
         })
       }
     }
+
+    const analysisThought = formatAnalysisThought(prompt, blueprint, siteResearch)
+    onTimeline?.({
+      id: 'thought-analysis',
+      kind: 'thought',
+      title: blueprint
+        ? `Understanding ${blueprint.brandName}`
+        : 'Understanding your request',
+      detail: analysisThought,
+      status: 'done',
+    })
 
     if (needsDocsSearch(prompt, config.isFileEdit)) {
       research = await searchIntegrationDocs(prompt, { abortSignal })
@@ -267,6 +281,7 @@ export const generateStreamResponse = async (
           abortSignal,
           completeness,
           blueprint,
+          analysisThought,
           planId,
           projectId: context.projectData.id,
           sandbox,
